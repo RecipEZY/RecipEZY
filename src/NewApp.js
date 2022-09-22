@@ -82,7 +82,11 @@ const App = () => {
         console.log("Old Recipe:", oldrecipe);
         let newRecipes = JSON.parse(JSON.stringify(oldrecipe));
         newRecipes[recipeName].ingredientDetails = detailedIngredients
-        newRecipes[recipeName].price = price;
+        if(!price) {
+          newRecipes[recipeName].price = 'Item(s) not available at Kroger'
+        }else {
+          newRecipes[recipeName].price = price;
+        }
         return newRecipes
       })
     }
