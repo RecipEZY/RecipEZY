@@ -79,7 +79,7 @@ krogerController.getItem2 = (req, res, next) => {
         // this is the path for individual pricing based on ingredient name
         let ingredientName = ingredientsList[index]
         test[recipe][ingredientName] = {};
-        let images = data.data[0].images[0].sizes
+        let images = data.data[0].images[0].sizes;
         for(let i = 0; i < images.length; i++){
           if(images[i].size === 'small'){
             test[recipe][ingredientName].picture = images[i].url;

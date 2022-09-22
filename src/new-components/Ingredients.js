@@ -5,10 +5,10 @@ const Ingredients = ({name, price, picture}) => {
    
   return (  
     <div className="ingredients">
-      <div>
-        <img src={picture} alt='ingredient image'/>
-        <div>{name}</div>
-        <div>{price}</div>
+      <div className="individual">
+        {picture ? (<img src={picture} alt='ingredient image'/>) : <></>}
+        <div> &nbsp; {name}</div>
+        <div> &nbsp; ${price}</div>
       </div>
     </div>
   )
