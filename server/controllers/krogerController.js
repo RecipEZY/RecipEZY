@@ -1,7 +1,7 @@
 const krogerController = {};
-
-// Declare an empty object
-// Store token data in this object
+const base64 = require('base-64');
+const fetch = require('cross-fetch');
+const { json } = require('express');
 const tokenData = {};
 
 // Makes a POST request to the Kroger server
@@ -11,13 +11,17 @@ const tokenData = {};
 // expires_in: 1800 *NOTE* in milliseconds (1800ms = 30 minutes)
 // token_type: "bearer"
 
+const client_id = 'recipesz-f9a2e53e4c0f883ee0dd978c67b24d718020873917048390920'
+const client_secret = 'UfNZjWBpD7cVbam3k-g8gMIESYDBkK41ZH1KvFOe'
+//const encoded = utf8_to_b64(client_id + ":" + client_secret);
+const encoded = base64.encode(client_id+":"+client_secret)
+
 krogerController.getToken = (req, res, next) => {
-  console.log('in getToken');
   fetch('https://api.kroger.com/v1/connect/oauth2/token', {
     method: 'POST',
     headers: {
       'Content-Type': 'application/x-www-form-urlencoded',
-      Authorization: `Basic Z2V0Z3JvY2VyaWVzLTMxNTE3YTA4MDlmZTQ2NzAzNDJiOTI4Y2JmYjEwZWRkNjM4ODYwNTc5OTc5NDcwMDUzNjo5bUJnSWZZaWRyQjNoQ0VzNFdMTXV5VGROV3dOX1hoLW1LdjB4aEJH`,
+      Authorization: 'Basic ' + encoded,
     },
     body: 'grant_type=client_credentials&scope=product.compact',
   })
@@ -26,57 +30,108 @@ krogerController.getToken = (req, res, next) => {
       tokenData.accessToken = data.access_token;
       tokenData.expiresIn = data.expires_in;
       tokenData.tokenType = data.token_type;
-
       res.locals.tokenInfo = tokenData;
-      // added a next statement
       return next();
     })
-    .catch((error) => next(error));
+    .catch((error) =>
+    next(
+      {
+        message: { err: error },
+        log: 'cannot retrieve data from edamam API',
+      }
+    )  
+    );
 };
 
-// Test call to the Kroger server
-// Hard coded the product name on line 43: filter.term=milk
-
-//req params req body
-
-//https://api.kroger.com/v1//products?filter.term=bread&filter.locationId=01400943&filter.limit=1
-krogerController.getItem = (req, res, next) => {
-  console.log('in getItem');
-  fetch(
-    `https://api.kroger.com/v1/products?filter.term=${req.params.item}}&filter.locationId=01400943&filter.limit=1`,
-    {
+krogerController.getItem2 = (req, res, next) => {
+  const recipe = Object.keys(req.body)
+  const ingredientsList = req.body[recipe]
+  const test = {};
+  test[recipe] = {};
+  const urls = [];
+  for (let key in req.body){
+    req.body[key].forEach((ingredient) => {
+      console.log(ingredient)
+      urls.push(`https://api.kroger.com/v1/products?filter.term=${ingredient}&filter.locationId=01400943&filter.limit=1`)
+    })
+  }
+  // use map() to perform a fetch and handle the response for each url
+  Promise.all(urls.map((url, index) =>
+    fetch(url, {
       method: 'GET',
       headers: {
         Accept: 'application/json',
         Authorization: `Bearer ${tokenData.accessToken}`,
         'Access-Control-Allow-Origin': '*',
       },
-    }
-  )
-    .then((res) => res.json())
-    .then((info) => {
-      // narrow down the properties we want from the response object that Kroger gives us
-      // food name, upc, price, size
-      const itemDetails = {
-        food_name: info.data[0].description,
-        upc: info.data[0].upc,
-        food_price: info.data[0].items[0].price.regular,
-        food_size: info.data[0].items[0].size,
-      };
-      // store only the data we want in res.locals, to later create new row in db
-      res.locals.itemInfo = itemDetails;
-      return next();
     })
-    .catch((err) => {
-      return next({ error: 'error with krogerController.getItem' });
-    });
+      .then((res) => res.json())                 
+      .then((data) => {
+        // this is the path for individual pricing based on ingredient name
+        let ingredientName = ingredientsList[index]
+        test[recipe][ingredientName] = {};
+        let images = data.data[0].images[0].sizes;
+        for(let i = 0; i < images.length; i++){
+          if(images[i].size === 'small'){
+            test[recipe][ingredientName].picture = images[i].url;
+          }
+        }
+        test[recipe][ingredientName].description = data.data[0].description;
+        test[recipe][ingredientName].price = data.data[0].items[0].price.regular;
+      })
+      .catch((err) => console.log(err))
+  ))
+  .then(() => {
+    res.locals.itemInfo = test;
+    next();
+  })
+}
+
+
+
+//https://api.kroger.com/v1//products?filter.term=bread&filter.locationId=01400943&filter.limit=1
+krogerController.getItem = (req, res, next) => {
+  const { ingredientsList } = req.body;
+  const itemInfo = {};
+  Promise.all(ingredientsList.forEach( async (ingredient) => {
+    console.log(ingredient);
+    fetch(
+      `https://api.kroger.com/v1/products?filter.term=${ingredient}}&filter.locationId=01400943&filter.limit=1`,
+      {
+        method: 'GET',
+        headers: {
+          Accept: 'application/json',
+          Authorization: `Bearer ${tokenData.accessToken}`,
+          'Access-Control-Allow-Origin': '*',
+        },
+      }
+    )
+      .then((res) => res.json())
+      .then((info) => {
+        // narrow down the properties we want from the response object that Kroger gives us
+        // food name, upc, price, size
+        itemInfo[ingredient] = {
+          food_name: info.data[0].description,
+          upc: info.data[0].upc,
+          food_price: info.data[0].items[0].price.regular,
+          food_size: info.data[0].items[0].size,
+        };
+        console.log(itemInfo);
+        // store only the data we want in res.locals, to later create new row in db
+      })
+      .catch((error) =>
+      next(
+        {
+          message: { err: error },
+          log: 'cannot retrieve data from edamam API',
+        }
+      )  
+      );
+  }))
+  .then((data) => {
+    res.locals.itemInfo = itemInfo;
+    return next();
+  })
 };
 
 module.exports = krogerController;
-
-// // curl -X GET \
-//   'https://api.kroger.com/v1/locations' \
-//   -H 'Accept: application/json' \
-//   -H 'Authorization: Bearer {{TOKEN}}'
-// https://api.kroger.com/v1/locations/{locationId}
-// https://api.kroger.com/v1/locations/{locationId}

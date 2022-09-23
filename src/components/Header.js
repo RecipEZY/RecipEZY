@@ -1,17 +1,18 @@
 import React from "react"
+import GoogleAuth from '../components/GoogleAuth';
 
-const Header = (props) => {
-  return (
+const Header = ({ user, setUser }) => {
+  
+  return(
     <header className="header">
-      <h3>Pink Fairy Shop Grabber</h3>
-      <h5> Hello, {props.userName}</h5>
+       <GoogleAuth 
+        user={user}
+        setUser={setUser}
+        />
+        <h3>RecipEZY</h3>
     </header>
   )
 }
 
-// Default userName to there! in case a username is not passed
-Header.defaultProps = {
-  userName: 'there!'
-}
 
 export default Header
