@@ -1,5 +1,4 @@
 import React from 'react';
-// import '../stylesheets/Ingredients.css';
 
 const Ingredients = ({name, price, picture}) => {
    

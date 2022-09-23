@@ -2,8 +2,6 @@ const krogerController = {};
 const base64 = require('base-64');
 const fetch = require('cross-fetch');
 const { json } = require('express');
-// Declare an empty object
-// Store token data in this object
 const tokenData = {};
 
 // Makes a POST request to the Kroger server
@@ -33,7 +31,6 @@ krogerController.getToken = (req, res, next) => {
       tokenData.expiresIn = data.expires_in;
       tokenData.tokenType = data.token_type;
       res.locals.tokenInfo = tokenData;
-      // added a next statement
       return next();
     })
     .catch((error) =>
@@ -46,7 +43,6 @@ krogerController.getToken = (req, res, next) => {
     );
 };
 
-//Getting an error somewhere in here. I'm sending individual objects, where the first key is the recipe and the value is an array of ingredients
 krogerController.getItem2 = (req, res, next) => {
   const recipe = Object.keys(req.body)
   const ingredientsList = req.body[recipe]
@@ -54,16 +50,11 @@ krogerController.getItem2 = (req, res, next) => {
   test[recipe] = {};
   const urls = [];
   for (let key in req.body){
-    // console.log(key);
     req.body[key].forEach((ingredient) => {
       console.log(ingredient)
       urls.push(`https://api.kroger.com/v1/products?filter.term=${ingredient}&filter.locationId=01400943&filter.limit=1`)
     })
   }
-  // console.log(urls)
-  // ingredientsList.forEach((ingredient) => {
-  //   urls.push(`https://api.kroger.com/v1/products?filter.term=${ingredient}}&filter.locationId=01400943&filter.limit=1`)
-  // })
   // use map() to perform a fetch and handle the response for each url
   Promise.all(urls.map((url, index) =>
     fetch(url, {
@@ -91,10 +82,8 @@ krogerController.getItem2 = (req, res, next) => {
       .catch((err) => console.log(err))
   ))
   .then(() => {
-    // console.log(itemInfo);
     res.locals.itemInfo = test;
     next();
-    // do something with the data
   })
 }
 
@@ -146,10 +135,3 @@ krogerController.getItem = (req, res, next) => {
 };
 
 module.exports = krogerController;
-
-// // curl -X GET \
-//   'https://api.kroger.com/v1/locations' \
-//   -H 'Accept: application/json' \
-//   -H 'Authorization: Bearer {{TOKEN}}'
-// https://api.kroger.com/v1/locations/{locationId}
-// https://api.kroger.com/v1/locations/{locationId}

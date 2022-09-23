@@ -48,7 +48,7 @@ function GoogleAuth({ user, setUser }) {
         onSuccess={onSuccess}
         onFailure={onFailure}
         cookiePolicy={'single_host_origin'}
-        // isSignedIn={true}
+        isSignedIn={true}
         prompt="consent"
         approvalPrompt="force"
         scope="profile"

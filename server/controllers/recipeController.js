@@ -36,25 +36,22 @@ recipeController.getRecipes = async (req, res, next) => {
 
 recipeController.returnRecipes = (req, res, next) => {
 
-const recipes = {};
+  const recipes = {};
+  const recipeList = res.locals.recipeList;
 
-const recipeList = res.locals.recipeList;
-
- Promise.all(recipeList.map(recipe => {
-     
-        recipeDetails = {
-            name: recipe.recipe.label,
-            image: recipe.recipe.images.THUMBNAIL.url,
-            url: recipe.recipe.url,
-            ingredients: recipe.recipe.ingredientLines,
-            ingredientDetails: recipe.recipe.ingredients,
-          }
-
-      recipes[recipeDetails.name] = recipeDetails;
-        }))
-        .then( ()  => {
-          res.locals.recipes = recipes;
-          next();
+  Promise.all(recipeList.map(recipe => {
+    recipeDetails = {
+        name: recipe.recipe.label,
+        image: recipe.recipe.images.THUMBNAIL.url,
+        url: recipe.recipe.url,
+        ingredients: recipe.recipe.ingredientLines,
+        ingredientDetails: recipe.recipe.ingredients,
+    }
+    recipes[recipeDetails.name] = recipeDetails;
+      }))
+      .then( ()  => {
+        res.locals.recipes = recipes;
+        next();
     })
     .catch((error) => {
       next(

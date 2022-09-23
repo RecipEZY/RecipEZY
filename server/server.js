@@ -1,4 +1,3 @@
-//library imports
 const path = require('path');
 const express = require('express');
 const app = express();
@@ -30,15 +29,6 @@ const dbRouter = require ('./routes/dbRouter')
 app.use('/users', dbRouter)
 
 
-
-
-
-
-// //check if it exists in database
-// // app.use('/addToGroceryList', )
-
-// // get request to check db for input food item
-// // newItemName
 // app.get('/addToList/:item', groceryController.checkItem, (req, res) => {
 //   return res.status(200).json(res.locals.food);
 // });
@@ -66,11 +56,6 @@ app.get('/addToList/:item', krogerController.getToken, (req, res) => {
 });
 
 
-// // app.get('/krogerapi/token', krogerController.getToken, (req, res) => {
-// //   return res.status(200).json(res.locals.tokenInfo);
-// // });
-
-// // get request to grab token and then fetch item data from kroger api
 // app.get(
 //   '/krogerapi/getItem/:item',
 //   krogerController.getToken,

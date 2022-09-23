@@ -1,11 +1,7 @@
 import React from 'react';
 import Recipe from './Recipe';
-import '../stylesheets/RecipeSearch.css'
-
-
 
 const RecipeSearch = ({ recipes, getRecipes, setRecipeDetail }) => {  
-  // console.log(recipes);
   //create an array of objects to display on the recipeSearch page
   const currRecipes = [];
   for (let key in recipes){

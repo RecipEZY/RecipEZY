@@ -1,9 +1,7 @@
 import React from "react"
-// import { Link } from 'react-router-dom';
 import GoogleAuth from '../components/GoogleAuth';
 
 const Header = ({ user, setUser }) => {
-  // console.log(updateUserState)
   
   return(
     <header className="header">

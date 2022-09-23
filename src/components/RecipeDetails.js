@@ -1,6 +1,5 @@
 import React from 'react';
 import Ingredients from './Ingredients.js'
-// import '../stylesheets/RecipeDetails.css';
 
 const RecipeDetails = ({recipes, recipeDetail, addToGroceryList, user}) => {
   //render the ingredients of the recipe selected

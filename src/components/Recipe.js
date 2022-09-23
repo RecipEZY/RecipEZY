@@ -1,15 +1,10 @@
 import React from 'react';
-import { redirect, useNavigate } from 'react-router-dom';
-import '../stylesheets/Recipe.css';
+import { useNavigate } from 'react-router-dom';
 
 const Recipe = ({img, name, url, price, setRecipeDetail}) => {
-
   
   //render individual recipes (flexbox with align centers, and space between)
-    //display the name of the recipe with the total price below (flexbox with columns and space-around)
-    //img of the recipe to be on the right side
-    // console.log(price);
-    const Navigate = useNavigate();
+  const Navigate = useNavigate();
 
   return (  
     <div className="recipes">
